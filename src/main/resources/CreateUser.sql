@@ -18,5 +18,7 @@ grant connect on database java_db_izergin to java_user_izergin;
 /*
 --после подключения из под java_user_izergin выполнить
 create schema if not exists java_schema_izergin;
+
+alter schema java_schema_izergin owner to java_user_izergin;
 SET search_path TO java_schema_izergin;
 */
