@@ -1,5 +1,6 @@
 package ru.izergin.hometask.dao;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,7 @@ public class GenreDaoImpl {
 
     private final NamedParameterJdbcOperations jdbcTemplate;
 
-    public GenreDaoImpl(NamedParameterJdbcOperations jdbcTemplate) {
+    public GenreDaoImpl(@Qualifier("namedParameterJdbcTemplateH2") NamedParameterJdbcOperations jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

@@ -1,5 +1,6 @@
 package ru.izergin.hometask.dao;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,12 @@ public class AuthorDaoImpl {
 
     private final NamedParameterJdbcOperations jdbcTemplate;
 
-    public AuthorDaoImpl(NamedParameterJdbcOperations jdbcTemplate) {
+    //настройки для postgre базы данных
+//    public AuthorDaoImpl(@Qualifier("namedParameterJdbcTemplatePg") NamedParameterJdbcOperations jdbcTemplate) {
+//        this.jdbcTemplate = jdbcTemplate;
+//    }
+
+    public AuthorDaoImpl(@Qualifier("namedParameterJdbcTemplateH2") NamedParameterJdbcOperations jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
