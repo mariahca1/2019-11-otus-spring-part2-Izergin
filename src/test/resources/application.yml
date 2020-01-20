@@ -1,3 +1,0 @@
-spring:
-  datasource:
-    data: test-data.sql

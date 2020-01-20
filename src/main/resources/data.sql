@@ -12,3 +12,4 @@ insert into genres values(default,'Science fiction');
 delete from books where 1=1;
 insert into books values(default,'Voina i mir', 1 , 1);
 insert into books values(default,'kniga 2', 2 , 2);
+insert into books values(default,'kniga 3', 2 , 2);
