@@ -1,24 +1,29 @@
-package ru.izergin.hometask;
+package ru.izergin.hometask.controller;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Controller;
 import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.service.AuthorServiceImpl;
 import ru.izergin.hometask.service.BookServiceImpl;
 
 import java.util.List;
 
-@SpringBootApplication
-public class HometaskApplication {
+@Controller
+public class MainController {
+    private final BookServiceImpl bookService;
+    private final AuthorServiceImpl authorService;
 
-    public static void main(String[] args) throws Exception {
-        ApplicationContext context = SpringApplication.run(HometaskApplication.class, args);
+    public MainController(BookServiceImpl bookService, AuthorServiceImpl authorService) {
+        this.bookService = bookService;
+        this.authorService = authorService;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void start() {
+
         System.out.println("Start");
         // Console.main(args);
-
-        BookServiceImpl bookService = context.getBean(BookServiceImpl.class);
-        AuthorServiceImpl authorService = context.getBean(AuthorServiceImpl.class);
 
         System.out.println("authors cnt = " + authorService.getAuthorCount());
 
