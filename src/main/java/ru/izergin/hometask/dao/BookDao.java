@@ -12,14 +12,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.izergin.hometask.domain.Book;
+import ru.izergin.hometask.domain.Genre;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 
@@ -27,97 +25,65 @@ import static java.util.Objects.isNull;
 @Repository
 public class BookDao {
 
-//    private final NamedParameterJdbcOperations jdbcTemplate;
-
     @PersistenceContext
     private EntityManager em;
 
-    //em
+    public Long getCount() {
+        Query query = em.createQuery("select count(b.id) from Book b");
+        return (Long) query.getSingleResult();
+    }
+
     public Book save(Book book) {
         if (isNull(book.getId())) {
             em.persist(book);
-            return book;
         } else {
-            return em.merge(book); //сперва делает select по id, затем update
+            em.merge(book); //сперва делает select по id, затем update
         }
+        em.flush();
+        return book;
     }
 
-
-//    public BookDaoImpl(/*@Qualifier("namedParameterJdbcTemplateH2")*/ NamedParameterJdbcOperations jdbcTemplate) {
-//        this.jdbcTemplate = jdbcTemplate;
-//    }
-//
-//    public int getBookCount() {
-//        Map<String, Integer> params = new HashMap<>();
-//        int result;
+    public Optional<Book> getByName(String name) {
 //        try {
-//            result = jdbcTemplate.queryForObject("select count(1) from books", params, Integer.class);
-//            //Unboxing of 'jdbcTemplate.queryForObject("select count(1) from books", params, Integer.class)' may produce 'NullPointerException'
-//            //Как бороться с этой ошибкой?
-//        } catch (NullPointerException e1) {
-//            result = -1;
+            TypedQuery<Book> typedQuery = em.createQuery("select b from Book b where b.name = :name", Book.class);
+            typedQuery.setParameter("name", name);
+            List<Book> bookList = typedQuery.getResultList();
+            return Optional.ofNullable(bookList.size() == 0 ? null : bookList.get(0));
+//        } catch (NoSuchElementException e) {
+//            throw new NoSuchElementException("Книга с названием '" + name + "' не найдена!");
 //        }
-//        return result;
-//    }
-//
-//    public Book getBookByName(String name) throws EmptyResultDataAccessException {
-//        Map<String, Object> params = new HashMap<>(1);
-//        params.put("name", name);
-//        Book b;
-//        try {
-////            b = jdbcTemplate.queryForObject("select id,name,author_id,genre_id from books where name = :name", params, new BookMapper());
-//            b = jdbcTemplate.queryForObject("select id,name,author_id,genre_id from books where name = :name", params, BeanPropertyRowMapper.newInstance(Book.class));
-//        } catch (EmptyResultDataAccessException e) {
-//            throw new EmptyResultDataAccessException("Книга с названием '" + name + "' не найдена!", 1);
-//        }
-//        return b;
-//    }
-//
-//    public void insertBook(Book book) {
-//        MapSqlParameterSource params = new MapSqlParameterSource();
-//        params.addValue("name", book.getName());
-//        params.addValue("author_id", book.getAuthorList());
-//        params.addValue("genre_id", book.getGenre());
-//        KeyHolder kh = new GeneratedKeyHolder();
-//        try {
-//            jdbcTemplate.update("insert into books (name,author_id,genre_id) values (:name,:author_id,:genre_id)", params, kh);
-//        } catch (DuplicateKeyException e) {
-//            throw new DuplicateKeyException("Книга с таким названием уже существует!");
-//        }
-//        book.setId((int) kh.getKeyList().get(0).get("id"));
-//    }
-//
-//    public void deleteBook(Book book) {
-//        Map<String, Object> params = new HashMap<>(1);
-//        params.put("name", book.getName());
-//        jdbcTemplate.update("delete from books where name = :name", params);
-//    }
-//
-//    //обновление всех полей книги по её ID. Пока без особого смысла (идентификаторы автора пользователю все равно не известны)
-//    public void updateBookById(Book book) {
-//        Map<String, Object> params = new HashMap<>(4);
-//        params.put("id", book.getId());
-//        params.put("name", book.getName());
-//        params.put("author_id", book.getAuthorList());
-//        params.put("genre_id", book.getGenre());
-//        jdbcTemplate.update("update books set name = :name, author_id = :author_id, genre_id = :genre_id where id = :id", params);
-//    }
-//
-//    public List<Book> getAllBooks() {
-//        return jdbcTemplate.query("select * from books", BeanPropertyRowMapper.newInstance(Book.class));
-////        jdbcTemplate.
-//    }
-/*
-    public static class BookMapper implements RowMapper<Book> {
-        @Override
-        public Book mapRow(ResultSet resultSet, int i) throws SQLException {
-            int id = resultSet.getInt("id");
-            String name = resultSet.getString("name");
-            int authorId = resultSet.getInt("author_id");
-            int genreId = resultSet.getInt("genre_id");
-            return new Book(id, name, authorId, genreId);
-        }
-    }*/
+    }
 
+    public void deleteById(Long id) {
+        Query query = em.createQuery("delete from Book b where b.id = :id");
+        query.setParameter("id", id);
+        query.executeUpdate();
+    }
 
+    public void updateById(Long id, Book book) {
+        Query query = em.createQuery("update Book b set b.name = :name, b.genre = :genre , b.comments = :comments where b.id = :id");
+        query.setParameter("id", id);
+        query.setParameter("name", book.getName());
+        query.setParameter("genre", book.getGenre());
+        query.setParameter("comments", book.getComments());
+        query.executeUpdate();
+    }
+
+    public void updateNameById(Long id, Book book) {
+        Query query = em.createQuery("update Book b set b.name = :name where b.id = :id");
+        query.setParameter("id", id);
+        query.setParameter("name", book.getName());
+        query.executeUpdate();
+    }
+    public void updateGenreById(Long id, Book book) {
+        Query query = em.createQuery("update Book b set b.genre = :genre where b.id = :id");
+        query.setParameter("id", id);
+        query.setParameter("genre", book.getGenre());
+        query.executeUpdate();
+    }
+
+    public List<Book> getAll() {
+        Query query = em.createQuery("select b from Book b");
+        return query.getResultList();
+    }
 }

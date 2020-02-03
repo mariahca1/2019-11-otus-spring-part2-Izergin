@@ -25,7 +25,8 @@ public class Genre {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    public String ToString() {
+    @Override
+    public String toString() {
         return "[id=" + (isNull(id) ? 0 : id) + ",name=" + name + "]";
     }
 
