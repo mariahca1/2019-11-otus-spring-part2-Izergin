@@ -16,15 +16,13 @@ public class BookServiceImpl {
 
     public Long getCount(){return bookDao.getCount();}
 
+    public Optional<Book> findById(Long id){return bookDao.findById(id);}
+
     public Book save(Book book){return bookDao.save(book);};
 
     public Optional<Book> getBookByName(String name) {return bookDao.getByName(name);}
 
     public void deleteById(Long id) {bookDao.deleteById(id);}
-
-    public void updateById(Long id, Book book){bookDao.updateById(id,book);}
-    public void updateNameById(Long id, Book book){bookDao.updateNameById(id,book);}
-    public void updateGenreById(Long id, Book book){bookDao.updateGenreById(id,book);}
 
     public List<Book> getAll(){return bookDao.getAll();}
 }

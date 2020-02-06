@@ -35,11 +35,18 @@ public class MainController {
 
         //демонстрация базовых методов Book
         //создание 2х книг
-        Book book1 = new Book().setName("book1").setGenre(genre1);
+        Book book1 = new Book("book1", genre1);
         bookService.save(book1);
-        Book book2 = new Book().setName("book2").setGenre(genre1);
-        book2 = bookService.save(book2);
+
+        Book book2 = new Book("book2",genre1);
+        bookService.save(book2);
         System.out.println("Books count after books added = " + bookService.getCount().toString());
+
+        //вывод всех книг данного жанра
+        Genre genre3 = genreService.getByName("Classic").get();
+        for (Book book : genre3.getBookList()) {
+            System.out.println(book.toString());
+        }
 
         //удаление книги
         System.out.println(book2.getId());
@@ -48,8 +55,7 @@ public class MainController {
 
         //изменение книги
         book1.setName("book1_new").setGenre(genre2);
-        bookService.updateNameById(book1.getId(), book1);
-        bookService.updateGenreById(book1.getId(), book1);
+        bookService.save(book1);
 
         Book book3 = bookService.getBookByName("book1_new").get();
         System.out.println(book3);
@@ -72,6 +78,6 @@ public class MainController {
         Book book5 = bookService.getBookByName("book1_new").get();
         System.out.println(book5.toString());
 
-     //   Console.main();
+        //   Console.main();
     }
 }

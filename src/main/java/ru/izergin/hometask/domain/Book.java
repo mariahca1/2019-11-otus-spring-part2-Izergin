@@ -24,12 +24,11 @@ public class Book {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToOne(targetEntity = Genre.class, cascade = {CascadeType.MERGE})
+    @ManyToOne(targetEntity = Genre.class, fetch = FetchType.LAZY/*, cascade = {CascadeType.MERGE}*/)
     @JoinColumn(name = "genre_id", nullable = false)
     private Genre genre;
 
-
-    @OneToMany(targetEntity = BookComment.class, fetch = FetchType.EAGER,  cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(targetEntity = BookComment.class, fetch = FetchType.LAZY,  cascade = {CascadeType.ALL})
     @JoinColumn(name = "book_id", nullable = false)
     private List<BookComment> comments;
 
@@ -42,9 +41,9 @@ public class Book {
         return "Book id="+id+ ",name=\"" + this.name + "\",genre=\"" + this.genre.toString() + "\",comments="+this.comments.toString();
     }
 
-    public Book addComment(String comment){
-        this.comments.add(new BookComment(comment));
-        return this;
+    public Book(String name, Genre genre){
+        this.name = name;
+        this.genre = genre;
     }
 
 }
