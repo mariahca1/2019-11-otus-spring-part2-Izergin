@@ -1,6 +1,7 @@
 package ru.izergin.hometask.dao;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.izergin.hometask.domain.Book;
 
@@ -9,29 +10,16 @@ import java.util.*;
 
 import static java.util.Objects.isNull;
 
-@Transactional
 @Repository
 public class BookDao {
 
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public Long getCount() {
         Query query = em.createQuery("select count(b.id) from Book b");
         return (Long) query.getSingleResult();
-    }
-
-    public Optional<Book> findById(Long id) {
-        return Optional.ofNullable(em.find(Book.class, id));
-    }
-
-    public Book save(Book book) {
-        if (isNull(book.getId())) {
-            em.persist(book);
-        } else {
-            em.merge(book);
-        }
-        return book;
     }
 
     public Optional<Book> getByName(String name) {
@@ -41,10 +29,28 @@ public class BookDao {
         return Optional.ofNullable(bookList.size() == 0 ? null : bookList.get(0));
     }
 
-    public void deleteById(Long id) {
-        Query query = em.createQuery("delete from Book b where b.id = :id");
-        query.setParameter("id", id);
-        query.executeUpdate();
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Book save(Book book) {
+        if (isNull(book.getId())) {
+            //если нет id, то это может быть новая книга или уже имеющаяся в базе
+            Optional<Book> optionalBook = getByName(book.getName());
+            if (!optionalBook.isPresent()) {
+                em.persist(book);
+                return book;
+            } else {
+                //если в базе уже есть книга, обновим её поля, предварительно присвоив ID (по нему мерж)
+                book.setId(optionalBook.get().getId());
+                return em.merge(book);
+            }
+        } else {
+            em.merge(book);
+        }
+        return book;
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void delete(Book book) {
+        em.remove(book);
     }
 
     public List<Book> getAll() {

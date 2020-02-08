@@ -37,10 +37,10 @@ create table genres (
 );
 
 alter table books
-   add constraint UK_eh6bfj824qyn40pii29i90bll unique (name);
+   add constraint UK_books_name unique (name);
 
 alter table genres
-   add constraint UK_pe1a9woik1k97l87cieguyhh4 unique (name);
+   add constraint UK_genres_name unique (name);
 
 alter table book_author_links
    add constraint FKn08d5petvk7irdkwx7gckkmsd

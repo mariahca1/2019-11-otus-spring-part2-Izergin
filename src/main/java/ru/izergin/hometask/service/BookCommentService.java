@@ -1,18 +1,15 @@
 package ru.izergin.hometask.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.izergin.hometask.dao.BookCommentDao;
-import ru.izergin.hometask.domain.BookComment;
 
 @Service
+@Transactional
 public class BookCommentService {
 
+    @Autowired
     private BookCommentDao bookCommentDao;
-    public BookCommentService(BookCommentDao bookCommentDao){
-        this.bookCommentDao = bookCommentDao;
-    }
 
-    public void addComment(BookComment bookComment){
-        bookCommentDao.addComment(bookComment);
-    }
 }

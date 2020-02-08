@@ -13,7 +13,7 @@ spring:
       hibernate:
         format_sql: true
         enable_lazy_load_no_trans: true
-    show-sql: true
+    show-sql: false
 
 logging:
   level:

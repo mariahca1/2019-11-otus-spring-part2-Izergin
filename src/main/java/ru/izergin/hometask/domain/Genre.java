@@ -26,8 +26,8 @@ public class Genre {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Book> bookList= new ArrayList<>();
+    @OneToMany(mappedBy = "genre", orphanRemoval = true)
+    private List<Book> bookList = new ArrayList<>();
 
     @Override
     public String toString() {
