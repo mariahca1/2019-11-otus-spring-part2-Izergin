@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    initialization-mode: always #never #always #
+    schema: schema.sql
+    data: data.sql
+
+  jpa:
+    generate-ddl: true # execute schema.sql
+    hibernate:
+      ddl-auto: validate #create #validate #генерировать ddl по аннотациям на классах/полях
+    properties:
+      hibernate:
+        format_sql: true
+        enable_lazy_load_no_trans: true
+    show-sql: false
+
+logging:
+  level:
+    ROOT: ERROR

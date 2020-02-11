@@ -10,7 +10,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-
+/*
 @Configuration
 @EnableTransactionManagement
 public class H2Config {
@@ -33,3 +33,4 @@ public class H2Config {
         return new DataSourceTransactionManager(dataSource());
     }
 }
+*/
