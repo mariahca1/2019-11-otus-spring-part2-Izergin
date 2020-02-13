@@ -1,17 +1,8 @@
 package ru.izergin.hometask.dao;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import ru.izergin.hometask.domain.BookComment;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
-@Repository
-public class BookCommentDao {
+public interface BookCommentDao extends JpaRepository<BookComment, Long> {
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void addComment(BookComment bookComment){
-        em.persist(bookComment);
-    }
 }
