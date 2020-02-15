@@ -5,7 +5,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.domain.Genre;
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Dao для работы с книгами")
 @DataJpaTest
-@Import({BookDao.class,Genre.class}) //из контекста достем этот класс
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD) //поднимаем контекст для каждого теста
 public class BookDaoTest {
 
@@ -35,14 +33,14 @@ public class BookDaoTest {
     @DisplayName("возвращает верное число книг")
     @Test
     void getBookCountTest() {
-        val cnt = bookDao.getCount();
+        val cnt = bookDao.count();
         assertThat(cnt).isEqualTo(INITIAL_BOOK_COUNT);
     }
 
     @DisplayName("извлекает книгу из базы")
     @Test
     void getBookByNameTest() {
-        Book book = bookDao.getByName(EXISTING_TEST_BOOK1.getName()).get();
+        Book book = bookDao.findByName(EXISTING_TEST_BOOK1.getName()).get(0);
         assertThat(book.getId()).isEqualTo(EXISTING_TEST_BOOK1.getId());
         assertThat(book.getName()).isEqualTo(EXISTING_TEST_BOOK1.getName());
     }
@@ -51,14 +49,14 @@ public class BookDaoTest {
     @Test
     void getBookByNameEmptyResultSetTest() {
         String nonExistingBookName = "non existing book name";
-        assertThat(bookDao.getByName(nonExistingBookName)).isEmpty();
+        assertThat(bookDao.findByName(nonExistingBookName)).isEmpty();
     }
 
     @DisplayName("записывает книгу в базу")
     @Test
     void insertNewBookTest() {
         bookDao.save(NEW_TEST_BOOK);
-        Book book = bookDao.getByName(NEW_TEST_BOOK.getName()).get();
+        Book book = bookDao.findByName(NEW_TEST_BOOK.getName()).get(0);
         assertThat(book.getId()).isEqualTo(NEW_TEST_BOOK.getId());
         assertThat(book.getName()).isEqualTo(NEW_TEST_BOOK.getName());
     }

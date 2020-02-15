@@ -9,15 +9,15 @@ import java.util.List;
 
 @Getter
 @Setter
-@Accessors(chain  = true)
+@Accessors(chain = true)
 @AllArgsConstructor
 public class BookDto {
     private String name;
-    private String genre;
+    private String genreName;
     private List<String> comments;
 
-    public BookDto(String name, String genre){
+    public BookDto(String name, String genreName) {
         this.name = name;
-        this.genre = genre;
+        this.genreName = genreName;
     }
 }

@@ -1,8 +1,8 @@
 package ru.izergin.hometask.dao;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.izergin.hometask.domain.Author;
 
-@Repository
-public class AuthorDao {
+public interface AuthorDao extends JpaRepository<Author, Long> {
 
 }
