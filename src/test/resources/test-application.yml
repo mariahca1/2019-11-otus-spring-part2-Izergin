@@ -1,3 +1,0 @@
-spring:
-  datasource:
-    data: data.sql

@@ -1,63 +1,57 @@
 package ru.izergin.hometask.dao;
 
-import lombok.val;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.izergin.hometask.domain.Author;
 import ru.izergin.hometask.domain.Book;
-import ru.izergin.hometask.domain.Genre;
+import ru.izergin.hometask.service.AuthorServiceImpl;
+import ru.izergin.hometask.service.BookServiceImpl;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Dao для работы с книгами")
-@DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD) //поднимаем контекст для каждого теста
+@DataMongoTest
+
+@ExtendWith(SpringExtension.class)
+@Import({BookServiceImpl.class, AuthorServiceImpl.class})
 public class BookDaoTest {
 
-    private final int INITIAL_BOOK_COUNT = 2; //при старте базы в таблице 2 книги
-
-    private final Genre EXISTING_TEST_GENRE1 = new Genre().setId(1L).setName("Classic");
-    private final Genre EXISTING_TEST_GENRE2 = new Genre().setId(2L).setName("Horror");
-    private final Book EXISTING_TEST_BOOK1 = new Book().setId(1L).setName("Classic book").setGenre(EXISTING_TEST_GENRE1);
-    private final Book EXISTING_TEST_BOOK2 = new Book().setId(2L).setName("Horror book").setGenre(EXISTING_TEST_GENRE2);
-    private final Book NEW_TEST_BOOK = new Book("New horror book", EXISTING_TEST_GENRE2);
-
     @Autowired
-    private BookDao bookDao;
-
+    BookServiceImpl bookService;
     @Autowired
-    private TestEntityManager em;
+    AuthorServiceImpl authorService;
 
-    @DisplayName("возвращает верное число книг")
-    @Test
-    void getBookCountTest() {
-        val cnt = bookDao.count();
-        assertThat(cnt).isEqualTo(INITIAL_BOOK_COUNT);
+    private final Book EXISTING_TEST_BOOK1 = new Book("book1", "Classic", 10);
+
+    @BeforeEach
+    public  void init(@Autowired MongoTemplate mongoTemplate){
+        authorService.deleteAll();
+        bookService.deleteAll();
+        Author author = new Author("qwe", "qwe1");
+        mongoTemplate.insert(author,"authors");
+        mongoTemplate.insert(EXISTING_TEST_BOOK1,"books");
     }
 
-    @DisplayName("извлекает книгу из базы")
+    @DisplayName("возвращает верное число авторов")
     @Test
-    void getBookByNameTest() {
-        Book book = bookDao.findByName(EXISTING_TEST_BOOK1.getName()).get(0);
-        assertThat(book.getId()).isEqualTo(EXISTING_TEST_BOOK1.getId());
-        assertThat(book.getName()).isEqualTo(EXISTING_TEST_BOOK1.getName());
+    public void getBookCountTest(@Autowired MongoTemplate mongoTemplate) {
+        assertThat(mongoTemplate.count(new Query(), "authors")).isEqualTo(1L);
     }
 
-    @DisplayName("НЕ извлекает не существующую книгу из базы")
+    @DisplayName("извлекает книги по заданному жанру")
     @Test
-    void getBookByNameEmptyResultSetTest() {
-        String nonExistingBookName = "non existing book name";
-        assertThat(bookDao.findByName(nonExistingBookName)).isEmpty();
-    }
-
-    @DisplayName("записывает книгу в базу")
-    @Test
-    void insertNewBookTest() {
-        bookDao.save(NEW_TEST_BOOK);
-        Book book = bookDao.findByName(NEW_TEST_BOOK.getName()).get(0);
-        assertThat(book.getId()).isEqualTo(NEW_TEST_BOOK.getId());
-        assertThat(book.getName()).isEqualTo(NEW_TEST_BOOK.getName());
+    void getBookByGenreTest() {
+        List<Book> bookList= bookService.findByGenre("Classic");
+        assertThat(bookList.size()).isEqualTo(1);
+        assertThat(bookList.get(0).getName()).isEqualTo(EXISTING_TEST_BOOK1.getName());
+        assertThat(bookList.get(0).getGenre()).isEqualTo(EXISTING_TEST_BOOK1.getGenre());
     }
 }
