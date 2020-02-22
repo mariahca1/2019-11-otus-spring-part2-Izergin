@@ -2,11 +2,12 @@ package ru.izergin.hometask.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.*;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,52 +15,59 @@ import java.util.Optional;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Accessors(chain = true)
-@Entity
-@Table(name = "books")
+@Document(collection = "books")
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Field(name = "name")
+    @Indexed(unique = true)
     private String name;
 
-    @ManyToOne(targetEntity = Genre.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "genre_id", nullable = false)
-    private Genre genre;
+    @Field(name = "genre")
+    private String genre;
 
-    @OneToMany(targetEntity = BookComment.class, fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    @JoinColumn(name = "book_id", nullable = false)
-    private List<BookComment> comments;
+    @Field(name = "page_count")
+    private Integer pageCount;
 
-    @ManyToMany(targetEntity = Author.class, fetch = FetchType.LAZY)
-    @JoinTable(name = "book_author_links", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
+    @Field(name = "comments")
+    private List<String> comments;
+
+    @DBRef
     private List<Author> authors;
 
     @Override
     public String toString() {
         return "Book id=" + id
                 + ",name=\"" + this.name
-                + "\",genre=\"" + this.genre.toString()
-                + "\",comments=" + Optional.ofNullable(this.comments.toString()).orElse("");
+                + "\",genre=\"" + this.genre
+                + "\",pageCount=\"" + this.pageCount
+                + "\",comments=" + Optional.ofNullable(this.comments.toString()).orElse("")
+                + "\",authors=" + Optional.ofNullable(this.authors.toString()).orElse("")
+                ;
     }
 
-    public Book(String name, Genre genre) {
-        this.name = name;
-        this.genre = genre;
+    public Book() {
         this.comments = new ArrayList<>();
+        this.authors = new ArrayList<>();
     }
 
-    public Book(String name, Genre genre, List<BookComment> comments) {
+    public Book(String name, String genre, Integer pageCount) {
         this.name = name;
         this.genre = genre;
-        this.comments = comments;
+        this.pageCount = pageCount;
+        this.comments = new ArrayList<>();
+        this.authors = new ArrayList<>();
     }
 
-    public void addComment(String comment)
-    {
-        this.comments.add(new BookComment(comment));
+    public Book addComment(String comment) {
+        this.comments.add(comment);
+        return this;
+    }
+
+    public Book addAuthor(Author author) {
+        this.authors.add(author);
+        return this;
     }
 }

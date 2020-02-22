@@ -1,12 +1,11 @@
 package ru.izergin.hometask.dao;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.izergin.hometask.domain.Book;
 
 import java.util.List;
 
-public interface BookDao extends JpaRepository<Book, Long> {
-    List<Book> findByName(String name);
-    Boolean existsByName(String name);
+public interface BookDao extends MongoRepository<Book, Long>, BookDaoCustom {
+    List<Book> findByGenre(String name);
     void deleteByName(String name);
 }

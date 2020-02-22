@@ -4,29 +4,36 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import static java.util.Objects.isNull;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "authors")
+@Document(collection = "authors")
+@CompoundIndex(def = "{'firstName':1, 'secondName':1}", name = "compound_index")
 public class Author {
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "first_name", nullable = false)
+    @Field(name = "first_name")
     private String firstName;
 
-    @Column(name = "second_name", nullable = false)
+    @Field(name = "second_name")
     private String secondName;
 
     @Override
     public String toString() {
         return "[id=" + (isNull(id) ? 0 : id) + ",first_name=" + firstName + ",second_name=" + secondName + "]";
+    }
+
+    public Author(String firstName, String secondName){
+        this.firstName = firstName;
+        this.secondName = secondName;
     }
 }
