@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+        .books, .books td {
+            border: 1px solid lightgray;
+            padding: 5px;
+        }
+        .container {
+          width: 100%;
+          max-width: 1024px; /*максимальная ширина может иметь другое значение*/
+          padding: 0 15px;
+          margin: 0 auto;
+        }
+        .col-1-4 {
+          width: 25%;
+          float: left;
+          background: lightblue;
+        }
+        .col-3-4 {
+          width: 75%;
+          float: left;
+          background: seashell;
+        }
+        .container:after, .row:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+        .row {
+          margin-bottom: 15px;
+        }
+        .container {
+          margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1 align="center">Создание новой книги</h1>
+    </div>
+</header>
+
+<div class="main">
+    <div class="container">
+        <div class="row">
+            <div class="col-1-4">
+                <h3>Действия:</h3>
+                <nav>
+                    <ul>
+                        <li><a href="mainPage.html" th:href="@{/main}">Вернуться на главную</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-3-4">
+                <h3>Создание книги:</h3>
+
+                <form action="#" th:action="@{/create}" th:object="${bookWebDto}" method="post">
+                    <ul>
+                        <li><label>Название</label></li>
+                        <li><input type="text" th:field="*{name}"/></li>
+                        <li><label>Жанр</label></li>
+                        <li><input type="text" th:field="*{genreName}"/></li>
+                        <li><label>Количество страниц</label></li>
+                        <li><input type="text" th:field="*{pageCount}"/></li>
+
+                        <li><label>Имя Автора</label><input type="text" th:field="*{authorFirstName}"/></li>
+                        <li><label>Фамилия Автора</label><input type="text" th:field="*{authorSecondName}"/></li>
+
+                        <li><input type="submit" value="Создать"/></li>
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -24,12 +24,19 @@ public class BookServiceImpl implements BookService {
         return bookDao.count();
     }
 
+    public Book findById(String id) {
+        return bookDao.findById(id);
+    }
+
     @SneakyThrows
     @Transactional
     //сохранение книги
     public Book save(BookDto bookDto) {
         List<Author> authorList = authorService.saveList(bookDto.getAuthors());
-        return bookDao.save(new Book(bookDto.getName(), bookDto.getGenreName(), bookDto.getPageCount()).setAuthors(authorList));
+        Book book = new Book(bookDto.getName(), bookDto.getGenreName(), bookDto.getPageCount())
+                .setAuthors(authorList)
+                .setComments(bookDto.getComments());
+        return bookDao.save(book);
     }
 
     @SneakyThrows
@@ -41,6 +48,33 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional
+    public Book deleteComment(String bookId, int commentNum){
+        Book book = bookDao.findById(bookId);
+        book.getComments().remove(commentNum);
+        return bookDao.save(book);
+    }
+
+    @Transactional
+    public Book addComment(String bookId, String commentText){
+        Book book = bookDao.findById(bookId);
+        book.addComment(commentText);
+        return update(book);
+    }
+
+    @Transactional
+    public Book deleteAuthor(String bookId, int authorNum){
+        Book book = bookDao.findById(bookId);
+        book.getAuthors().remove(authorNum);
+        return update(book);
+    }
+
+    @Transactional
+    public Book addAuthor(String bookId, Author author){
+        Book book = bookDao.findById(bookId).addAuthor(author);
+        return update(book);
+    }
+
+    @Transactional
     public void deleteAll() {
         bookDao.deleteAll();
     }
@@ -48,6 +82,11 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public void deleteByName(String name) {
         bookDao.deleteByName(name);
+    }
+
+    @Transactional
+    public void deleteById(String id) {
+        bookDao.deleteById(id);
     }
 
     public List<Book> getAll() {
