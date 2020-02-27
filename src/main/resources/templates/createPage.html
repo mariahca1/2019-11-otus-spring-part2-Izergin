@@ -61,18 +61,16 @@
             <div class="col-3-4">
                 <h3>Создание книги:</h3>
 
-                <form action="#" th:action="@{/create}" th:object="${bookWebDto}" method="post">
+                <form action="#" th:action="@{/create}" th:object="${book}" method="post">
                     <ul>
                         <li><label>Название</label></li>
                         <li><input type="text" th:field="*{name}"/></li>
                         <li><label>Жанр</label></li>
-                        <li><input type="text" th:field="*{genreName}"/></li>
+                        <li><input type="text" th:field="*{genre}"/></li>
                         <li><label>Количество страниц</label></li>
                         <li><input type="text" th:field="*{pageCount}"/></li>
-
-                        <li><label>Имя Автора</label><input type="text" th:field="*{authorFirstName}"/></li>
-                        <li><label>Фамилия Автора</label><input type="text" th:field="*{authorSecondName}"/></li>
-
+                        <li><label>Имя Автора</label><input type="text" th:field="${book.authors[0].firstName}"/></li>
+                        <li><label>Фамилия Автора</label><input type="text" th:field="${book.authors[0].secondName}"/></li>
                         <li><input type="submit" value="Создать"/></li>
                     </ul>
                 </form>

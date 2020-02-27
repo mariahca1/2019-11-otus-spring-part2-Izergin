@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.izergin.hometask.domain.Author;
 import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.dto.BookDto;
-import ru.izergin.hometask.dto.BookWebDto;
 import ru.izergin.hometask.service.BookServiceImpl;
 
 import java.util.List;
@@ -28,7 +27,6 @@ public class BookController {
     @GetMapping("/update")
     public String getUpdateBook(@RequestParam("id") String id, Model model) {
         Book book = bookService.findById(id);
-        List<String> comments = book.getComments(); //тем самым фетчим и комментарии
         model.addAttribute("updatedBook", book);
         return "editPage";
     }
@@ -56,8 +54,6 @@ public class BookController {
 
     @GetMapping("/deleteAuthor")
     public String getDeleteAuthor(@RequestParam("bookId") String bookId, @RequestParam("authorNum") int authorNum, Model model) {
-        System.out.println(bookId);
-        System.out.println(authorNum);
         Book book = bookService.deleteAuthor(bookId, authorNum);
         model.addAttribute("updatedBook", book);
         return "editPage";
@@ -80,15 +76,15 @@ public class BookController {
 
     @GetMapping("/create")
     public String getCreateBook(Model model) {
-        model.addAttribute(new BookWebDto());
+        model.addAttribute(new Book());
         return "createPage";
     }
 
     @PostMapping("/create")
-    public String postCreateBook(@ModelAttribute BookWebDto bookWebDto, Model model) {
-        System.out.println(bookWebDto);
-        bookService.save(new BookDto(bookWebDto.getName(), bookWebDto.getGenreName(), bookWebDto.getPageCount())
-                .addAuthor(new Author(bookWebDto.getAuthorFirstName(), bookWebDto.getAuthorSecondName()))
+    public String postCreateBook(@ModelAttribute Book book, Model model) {
+        System.out.println(book);
+        bookService.save(new BookDto(book.getName(), book.getGenre(), book.getPageCount())
+                .addAuthor(new Author(book.getAuthors().get(0).getFirstName(), book.getAuthors().get(0).getSecondName()))
         );
         List<Book> bookList = bookService.getAll();
         model.addAttribute("bookList", bookList);
