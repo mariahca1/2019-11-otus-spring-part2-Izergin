@@ -8,4 +8,5 @@ import java.util.List;
 public interface BookDao extends MongoRepository<Book, Long>, BookDaoCustom {
     List<Book> findByGenre(String name);
     void deleteByName(String name);
+    void deleteById(String id);
 }

@@ -11,4 +11,7 @@ public interface BookDaoCustom {
     //Задумка такая, но реализация подкачала, просто ищу по имени, пока испытываю трудности со строчными функциями монги
     @Query("{genre: :#{#genre}}")
     List<Book> findByGenreFirstLetter(@Param("genre") String letter);
+
+    @Query("{id: :#{#id}}")
+    Book findById(@Param("id") String id);
 }
