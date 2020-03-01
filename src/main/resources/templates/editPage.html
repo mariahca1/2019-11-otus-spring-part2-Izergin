@@ -11,6 +11,37 @@
             border: 1px solid lightgray;
             padding: 5px;
         }
+        .cl_nameLabel {
+            height:20px;
+            width:160px;
+            margin: 3px;
+            display:inline-block;
+            float:left;
+        }
+        .cl_text {
+            height:20px;
+            width:220px;
+            margin: 3px;
+            }
+        .cl_button {
+            height:20px;
+            width:224px;
+            margin: 3px 3px 3px 169px;
+            }
+        .cl_resultLabel_suc {
+            height:20px;
+            margin: 3px 3px 3px 3px;
+            color: #00ff00;
+            display:inline-block;
+            float:left;
+            }
+        .cl_resultLabel_err {
+            height:20px;
+            margin: 3px 3px 3px 3px;
+            color: #ff0000;
+            display:inline-block;
+            float:left;
+            }
         .container {
           width: 100%;
           max-width: 1024px; /*максимальная ширина может иметь другое значение*/
@@ -38,8 +69,8 @@
         .container {
           margin-bottom: 50px;
         }
-
     </style>
+    <script src="webjars/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 <header>
@@ -61,27 +92,22 @@
                 </nav>
             </div>
             <div class="col-3-4">
-                <h3>Данные книги</h3>
-                <form id="updateForm" action="#" th:action="@{/update}" th:object="${updatedBook}" method="post">
-                    <div class="row">
-                        <input type="hidden" th:field="*{id}" value="123" readonly="readonly"/>
+                <fieldset class="newBookFieldSet">
+                    <legend>Редактирование книги</legend>
+
+                    <input type="hidden" id="i_id" readonly="readonly"/>
+
+                    <div><label class="cl_nameLabel">Название *</label>
+                        <input class="cl_text" type="text" id="i_name" autofocus placeholder="Название книги">
                     </div>
-                    <div class="row">
-                        <label>Название:&nbsp;</label>
-                        <input type="text" th:field="*{name}" value="John Doe"/>
-                    </div>
-                    <div class="row">
-                        <label>Жанр:&nbsp;</label>
-                        <input type="text" th:field="*{genre}" value="Genre"/>
-                    </div>
-                    <div class="row">
-                        <label>Количество страниц:&nbsp;</label>
-                        <input type="text" th:field="*{pageCount}" value="100"/>
-                    </div>
+                    <div><label class="cl_nameLabel">Жанр *</label>
+                        <input class="cl_text" type="text" id="i_genre" placeholder="Жанр книги"></div>
+                    <div><label class="cl_nameLabel">Количество страниц *</label>
+                        <input class="cl_text" type="text" id="i_pageCount" placeholder="Количество страниц"></div>
 
                     <div class="row">
                         Авторы
-                        <table class="table">
+                        <table class="table" id="tblAuthors">
                             <thead>
                             <tr>
                                 <th>№</th>
@@ -91,64 +117,117 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="author, authorStat : *{authors}">
-                                <input type="hidden" name="id"
-                                       th:field="*{authors[__${authorStat.index}__].id}"
-                                       th:id="${'id-'+authorStat.index}"/>
-                                <td th:text="${authorStat.count}">1</td>
-                                <td><input type="text" name="firstName"
-                                           th:field="*{authors[__${authorStat.index}__].firstName}"
-                                           th:id="${'firstName-'+authorStat.index}"/></td>
-                                <td><input type="text" name="secondName"
-                                           th:field="*{authors[__${authorStat.index}__].secondName}"
-                                           th:id="${'secondName-'+authorStat.index}"/></td>
-                                <td><a href="editPage.html"
-                                       th:href="@{/deleteAuthor(bookId=*{id},authorNum=${authorStat.index})}">Удалить</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td><a href="editPage.html" th:href="@{/addAuthor(bookId=*{id})}">Добавить</a></td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        Комментарии
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Комментарий</th>
-                                <th>Действия</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="comment, commentStat : *{comments}">
-                                <td th:text="${commentStat.count}">1</td>
-                                <td><input type="text" name="comment"
-                                           th:field="*{comments[__${commentStat.index}__]}"
-                                           th:id="${'comments-'+commentStat.index}"/></td>
-                                <td><a href="editPage.html"
-                                       th:href="@{/deleteComment(bookId=*{id},commentNum=${commentStat.index})}">Удалить</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td><a href="editPage.html" th:href="@{/addComment(bookId=*{id},commentText='')}">Добавить</a>
-                                </td>
-                            </tr>
                             </tbody>
                         </table>
                     </div>
-                    <input type="submit" value="Сохранить"/>
-                </form>
+
+
+                    <div><input type="button" class="cl_button" id="b_saveBook" value="Сохранить изменения"/></div>
+                    <div><label id="i_resultLabel"></label></div>
+
+
+                </fieldset>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+console.log("Загрузились");
+var bookId = new URL(window.location.href).searchParams.get("id");
+console.log(bookId);
+loadBookData(bookId);
+
+function deleteAuthor(bookId, authorNum){
+    $.ajax({
+        url: '/api/deleteAuthor',
+        method: 'POST',
+        data: JSON.stringify({
+            bookId: bookId,
+            authorNum: authorNum
+        }),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+            $("#tblAuthors").empty();
+        },
+        complete: function(data) {
+            if (data.responseJSON.result_code == 200) {
+                loadBookData(bookId);
+            } else {
+                alert(data.responseJSON.result_message);
+            }
+        }
+    });
+}
+
+function loadBookData(id){
+    $.ajax({
+            url: '/api/getBook',
+            method: 'POST',
+            data: JSON.stringify({
+                id: bookId
+            }),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            complete: function(data) {
+               console.log("complete");
+               console.log(data);
+               $("#i_id").val(data.responseJSON.id);
+               $("#i_name").val(data.responseJSON.name);
+               $("#i_genre").val(data.responseJSON.genre);
+               $("#i_pageCount").val(data.responseJSON.pageCount);
+
+               data.responseJSON.authors.forEach(function(author, i){$("#tblAuthors").append(`<tr class="author_row">
+                                                                          <td>`+(i+1)+`</td>
+                                                                          <td>`+author.firstName+`</td>
+                                                                          <td>`+author.secondName+`</td>
+                                                                          <td>
+                                                                             <div><button onClick="deleteAuthor('`+bookId+`',`+i+`)">Удалить</button></div>
+                                                                          </td>
+                                                                     </tr>`);})
+            }
+        });
+}
+
+$("#b_saveBook").click(function() {
+    $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+
+    var id = $("#i_id").val();
+    var name = $("#i_name").val();
+    var genre = $("#i_genre").val();
+    var pageCount = $("#i_pageCount").val();
+
+    if ((name == "") || (genre == "") || (pageCount == "")) {
+        $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+        $("#i_resultLabel").append("Не все обязательные поля заполнены").addClass("cl_resultLabel_err");
+        return;
+    }
+
+$.ajax({
+        url: '/api/updateBook',
+        method: 'POST',
+        data: JSON.stringify({
+            id: id,
+            name: name,
+            genre: genre,
+            pageCount: pageCount
+        }),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+            $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+        },
+        complete: function(data) {
+            if (data.responseJSON.result_code == 200) {
+                $("#i_resultLabel").append(data.responseJSON.result_message).addClass("cl_resultLabel_suc");
+            } else {
+                $("#i_resultLabel").append(data.responseJSON.result_message).addClass("cl_resultLabel_err");
+            }
+        }
+    });
+})
+</script>
 
 </body>
 </html>
