@@ -7,10 +7,40 @@
         body {
             padding: 50px;
         }
-        .books, .books td {
-            border: 1px solid lightgray;
-            padding: 5px;
+        input:focus {
+            background: #eaeaea;
+            }
+        .cl_nameLabel {
+            height:20px;
+            width:160px;
+            margin: 3px;
+            display:inline-block;
+            float:left;
         }
+        .cl_text {
+            height:20px;
+            width:220px;
+            margin: 3px;
+            }
+        .cl_button {
+            height:20px;
+            width:224px;
+            margin: 3px 3px 3px 169px;
+            }
+        .cl_resultLabel_suc {
+            height:20px;
+            margin: 3px 3px 3px 3px;
+            color: #00ff00;
+            display:inline-block;
+            float:left;
+            }
+        .cl_resultLabel_err {
+            height:20px;
+            margin: 3px 3px 3px 3px;
+            color: #ff0000;
+            display:inline-block;
+            float:left;
+            }
         .container {
           width: 100%;
           max-width: 1024px; /*максимальная ширина может иметь другое значение*/
@@ -38,7 +68,9 @@
         .container {
           margin-bottom: 50px;
         }
+
     </style>
+    <script src="webjars/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 <header>
@@ -59,25 +91,62 @@
                 </nav>
             </div>
             <div class="col-3-4">
-                <h3>Создание книги:</h3>
+                <fieldset class="newBookFieldSet">
+                    <legend>Создание книги</legend>
+                    <div><label class="cl_nameLabel">Название *</label>
+                        <input class="cl_text" type="text" id="i_name" autofocus placeholder="Название книги">
+                    </div>
+                    <div><label class="cl_nameLabel">Жанр *</label>
+                        <input class="cl_text" type="text" id="i_genre" placeholder="Жанр книги"></div>
+                    <div><label class="cl_nameLabel">Количество страниц *</label>
+                        <input class="cl_text" type="text" id="i_pageCount" placeholder="Количество страниц"></div>
 
-                <form action="#" th:action="@{/create}" th:object="${book}" method="post">
-                    <ul>
-                        <li><label>Название</label></li>
-                        <li><input type="text" th:field="*{name}"/></li>
-                        <li><label>Жанр</label></li>
-                        <li><input type="text" th:field="*{genre}"/></li>
-                        <li><label>Количество страниц</label></li>
-                        <li><input type="text" th:field="*{pageCount}"/></li>
-                        <li><label>Имя Автора</label><input type="text" th:field="${book.authors[0].firstName}"/></li>
-                        <li><label>Фамилия Автора</label><input type="text" th:field="${book.authors[0].secondName}"/></li>
-                        <li><input type="submit" value="Создать"/></li>
-                    </ul>
-                </form>
+                    <div><input type="button" class="cl_button" id="b_saveBook" value="Создать"/></div>
+                    <div><label id="i_resultLabel"></label></div>
+                </fieldset>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+$("#b_saveBook").click(function() {
+    $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+
+    var name = $("#i_name").val();
+    var genre = $("#i_genre").val();
+    var pageCount = $("#i_pageCount").val();
+
+    if ((name == "") || (genre == "") || (pageCount == "")) {
+        $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+        $("#i_resultLabel").append("Не все обязательные поля заполнены").addClass("cl_resultLabel_err");
+        return;
+    }
+
+
+    $.ajax({
+        url: '/api/createBook',
+        method: 'POST',
+        data: JSON.stringify({
+            name: name,
+            genre: genre,
+            pageCount: pageCount
+        }),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        beforeSend: function() {
+            $("#i_resultLabel").empty().removeClass("cl_resultLabel_suc").removeClass("cl_resultLabel_err");
+        },
+        complete: function(data) {
+            if (data.responseJSON.result_code == 200) {
+                $("#i_resultLabel").append(data.responseJSON.result_message).addClass("cl_resultLabel_suc");
+            } else {
+                $("#i_resultLabel").append(data.responseJSON.result_message).addClass("cl_resultLabel_err");
+            }
+        }
+    });
+})
+
+</script>
 </body>
 </html>
