@@ -1,5 +1,6 @@
 package ru.izergin.hometask.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,15 @@ import ru.izergin.hometask.service.BookServiceImpl;
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 public class BookController {
 
-    @Autowired
-    private BookServiceImpl bookService;
+    private final BookServiceImpl bookService;
+
+    @RequestMapping("/test")
+    public @ResponseBody String test() {
+        return "hello";
+    }
 
     @GetMapping("/api/getAllBooks")
     public List<Book> getAllBooks() {

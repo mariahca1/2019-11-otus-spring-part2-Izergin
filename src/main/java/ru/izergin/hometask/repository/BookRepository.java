@@ -1,11 +1,11 @@
-package ru.izergin.hometask.dao;
+package ru.izergin.hometask.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.izergin.hometask.domain.Book;
 
 import java.util.List;
 
-public interface BookDao extends MongoRepository<Book, Long>, BookDaoCustom {
+public interface BookRepository extends MongoRepository<Book, Long>, BookRepositoryCustom {
     List<Book> findByGenre(String name);
     void deleteByName(String name);
     void deleteById(String id);

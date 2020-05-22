@@ -1,8 +1,8 @@
-package ru.izergin.hometask.dao;
+package ru.izergin.hometask.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.izergin.hometask.domain.Author;
 
-public interface AuthorDao extends MongoRepository<Author, Long> {
+public interface AuthorRepository extends MongoRepository<Author, Long> {
 
 }

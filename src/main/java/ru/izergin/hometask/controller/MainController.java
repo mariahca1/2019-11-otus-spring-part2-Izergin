@@ -1,5 +1,6 @@
 package ru.izergin.hometask.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -13,12 +14,11 @@ import ru.izergin.hometask.service.BookServiceImpl;
 import java.sql.SQLException;
 import java.util.List;
 
-@Controller
+//@Controller
+@AllArgsConstructor
 public class MainController {
-    @Autowired
-    private BookServiceImpl bookService;
-    @Autowired
-    private AuthorServiceImpl authorService;
+    private final BookServiceImpl bookService;
+    private final AuthorServiceImpl authorService;
 
     private final String GENRE_CLASSIC = "Classic";
     private final String GENRE_COMEDY = "Comedy";
@@ -26,7 +26,7 @@ public class MainController {
     private final String BOOK_NAME_1 = "Война и мир";
     private final String BOOK_NAME_2 = "Азбука";
 
-    @EventListener(ApplicationReadyEvent.class)
+//    @EventListener(ApplicationReadyEvent.class)
     public void init() {
         //удалить всё что есть для локальной БД
         authorService.deleteAll();

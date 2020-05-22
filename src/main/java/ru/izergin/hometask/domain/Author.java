@@ -16,7 +16,7 @@ import static java.util.Objects.isNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "authors")
-@CompoundIndex(def = "{'firstName':1, 'secondName':1}", name = "compound_index")
+//@CompoundIndex(def = "{'firstName':1, 'secondName':1}", name = "compound_index")
 public class Author {
     @Id
     private String id;
