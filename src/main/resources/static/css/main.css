@@ -1,0 +1,73 @@
+body {
+    padding: 50px;
+}
+input:focus {
+    background: #eaeaea;
+}
+.table, .table td {
+    border: 1px solid lightgray;
+    padding: 5px;
+}
+.cl_nameLabel {
+    height:20px;
+    width:160px;
+    margin: 3px;
+    display:inline-block;
+    float:left;
+}
+.cl_text {
+    height:20px;
+    width:220px;
+    margin: 3px;
+}
+.cl_text-1-2 {
+    height:20px;
+    width:104px;
+    margin: 3px;
+}
+.cl_button {
+    height:20px;
+    width:224px;
+    margin: 3px 3px 3px 169px;
+}
+.cl_resultLabel_suc {
+    height:20px;
+    margin: 3px 3px 3px 3px;
+    color: #00ff00;
+    display:inline-block;
+    float:left;
+}
+.cl_resultLabel_err {
+    height:20px;
+    margin: 3px 3px 3px 3px;
+    color: #ff0000;
+    display:inline-block;
+    float:left;
+}
+.container {
+    width: 100%;
+    max-width: 1024px; /*максимальная ширина может иметь другое значение*/
+    padding: 0 15px;
+    margin: 0 auto;
+}
+.col-1-4 {
+    width: 25%;
+    float: left;
+    background: lightblue;
+}
+.col-3-4 {
+    width: 75%;
+    float: left;
+    background: seashell;
+}
+.container:after, .row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+.row {
+    margin-bottom: 15px;
+}
+.container {
+    margin-bottom: 50px;
+}

@@ -1,56 +1,53 @@
 package ru.izergin.hometask.repository;
 
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.izergin.hometask.domain.Author;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.test.annotation.DirtiesContext;
+import reactor.test.StepVerifier;
 import ru.izergin.hometask.domain.Book;
-import ru.izergin.hometask.service.AuthorServiceImpl;
-import ru.izergin.hometask.service.BookServiceImpl;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Dao для работы с книгами")
-//@DataMongoTest
+@DataMongoTest
 
-@ExtendWith(SpringExtension.class)
-@Import({BookServiceImpl.class, AuthorServiceImpl.class})
+//поднимает контекст для каждог теста + свежую БД
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class BookRepositoryTest {
 
     @Autowired
-    BookServiceImpl bookService;
-    @Autowired
-    AuthorServiceImpl authorService;
+    BookReactiveRepository bookReactiveRepository;
 
-    private final Book EXISTING_TEST_BOOK1 = new Book("book1", "Classic", 10);
+    private final Book TEST_BOOK = new Book("book1", "Classic", 10);
+    private final Book TEST_BOOK2 = new Book("book2", "Classic", 10);
 
-    @BeforeEach
-    public  void init(@Autowired MongoTemplate mongoTemplate){
-        authorService.deleteAll();
-        bookService.deleteAll();
-        Author author = new Author("qwe", "qwe1");
-        mongoTemplate.insert(author,"authors");
-        mongoTemplate.insert(EXISTING_TEST_BOOK1,"books");
+    @Test
+    public void saveBookTest() {
+        StepVerifier
+                .create(bookReactiveRepository.save(TEST_BOOK))
+                .assertNext(book -> {
+                    assertEquals(book.getId(), TEST_BOOK.getId());
+                    assertEquals(book.getName(), TEST_BOOK.getName());
+                })
+                .expectComplete()
+                .verify();
     }
 
-    @DisplayName("возвращает верное число авторов")
-//    @Test
-    public void getBookCountTest(@Autowired MongoTemplate mongoTemplate) {
-        assertThat(mongoTemplate.count(new Query(), "authors")).isEqualTo(1L);
-    }
+    @Test
+    public void findBookTest() {
+        bookReactiveRepository.save(TEST_BOOK).subscribe();
+        bookReactiveRepository.save(TEST_BOOK2).subscribe();
 
-    @DisplayName("извлекает книги по заданному жанру")
-//    @Test
-    void getBookByGenreTest() {
-        List<Book> bookList= bookService.findByGenre("Classic");
-        assertThat(bookList.size()).isEqualTo(1);
-        assertThat(bookList.get(0).getName()).isEqualTo(EXISTING_TEST_BOOK1.getName());
-        assertThat(bookList.get(0).getGenre()).isEqualTo(EXISTING_TEST_BOOK1.getGenre());
+        StepVerifier
+                .create(bookReactiveRepository.findAll())
+                .expectNextCount(1)
+                .assertNext(book -> {
+                    assertEquals(book.getGenre(), TEST_BOOK.getGenre());
+                })
+                .expectComplete()
+                .verify();
     }
 }
