@@ -1,20 +1,11 @@
 package ru.izergin.hometask.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.matchers.Any;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,15 +13,7 @@ import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.dto.BookIdRequestDto;
 import ru.izergin.hometask.repository.AuthorReactiveRepository;
 import ru.izergin.hometask.repository.BookReactiveRepository;
-import ru.izergin.hometask.service.BookServiceImpl;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
-//@WebMvcTest(controllers = TestController.class)
-//@WebMvcTest(controllers = BookController.class)
-//@SpringBootTest
-//@AutoConfigureMockMvc
-//@Import({BookReactiveRepository.class})
 @WebFluxTest
 class BookControllerTest {
     @MockBean
