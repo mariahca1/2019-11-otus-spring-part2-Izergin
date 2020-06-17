@@ -1,103 +1,37 @@
 package ru.izergin.hometask.service;
 
-import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.izergin.hometask.dao.BookDao;
+import ru.izergin.hometask.repository.AuthorReactiveRepository;
+import ru.izergin.hometask.repository.BookReactiveRepository;
 import ru.izergin.hometask.domain.Author;
 import ru.izergin.hometask.domain.Book;
-import ru.izergin.hometask.dto.BookDto;
-
-import java.util.List;
 
 @Service
-public class BookServiceImpl implements BookService {
+@AllArgsConstructor
+public class BookServiceImpl //данный класс оставил только для инициализации - создания книги + авторов
+{
 
-    @Autowired
-    private BookDao bookDao;
-    @Autowired
-    private AuthorServiceImpl authorService;
+    private final BookReactiveRepository bookReactiveRepository;
+    private final AuthorReactiveRepository authorReactiveRepository;
 
-    @Transactional(readOnly = true)
-    public Long getCount() {
-        return bookDao.count();
-    }
+    public void init() {
+        authorReactiveRepository.deleteAll().subscribe();
+        bookReactiveRepository.deleteAll().subscribe();
 
-    public Book findById(String id) {
-        return bookDao.findById(id);
-    }
+        Book book = new Book("BOOK_NAME_1", "GENRE_CLASSIC", 5)
+                .addAuthor(new Author("Иван", "Иванов"))
+                .addAuthor(new Author("Иван2", "Иванов2"))
+                .addAuthor(new Author("Петр", "Петров"))
+                .addComment("Комментарий 1")
+                .addComment("Комментарий 2");
 
-    @SneakyThrows
-    @Transactional
-    //сохранение книги
-    public Book save(BookDto bookDto) {
-        List<Author> authorList = authorService.saveList(bookDto.getAuthors());
-        Book book = new Book(bookDto.getName(), bookDto.getGenreName(), bookDto.getPageCount())
-                .setAuthors(authorList)
-                .setComments(bookDto.getComments());
-        return bookDao.save(book);
-    }
-
-    @SneakyThrows
-    @Transactional
-    //обновление книги
-    public Book update(Book book) {
-        List<Author> authorList = authorService.saveList(book.getAuthors());
-        return bookDao.save(book).setAuthors(authorList);
-    }
-
-    @Transactional
-    public Book deleteComment(String bookId, int commentNum){
-        Book book = bookDao.findById(bookId);
-        book.getComments().remove(commentNum);
-        return bookDao.save(book);
-    }
-
-    @Transactional
-    public Book addComment(String bookId, String commentText){
-        Book book = bookDao.findById(bookId);
-        book.addComment(commentText);
-        return update(book);
-    }
-
-    @Transactional
-    public Book deleteAuthor(String bookId, int authorNum){
-        Book book = bookDao.findById(bookId);
-        book.getAuthors().remove(authorNum);
-        return update(book);
-    }
-
-    @Transactional
-    public Book addAuthor(String bookId, Author author){
-        Book book = bookDao.findById(bookId).addAuthor(author);
-        return update(book);
-    }
-
-    @Transactional
-    public void deleteAll() {
-        bookDao.deleteAll();
-    }
-
-    @Transactional
-    public void deleteByName(String name) {
-        bookDao.deleteByName(name);
-    }
-
-    @Transactional
-    public void deleteById(String id) {
-        bookDao.deleteById(id);
-    }
-
-    public List<Book> getAll() {
-        return bookDao.findAll();
-    }
-
-    public List<Book> findByGenre(String genre) {
-        return bookDao.findByGenre(genre);
-    }
-
-    public List<Book> findByGenreFirstLetter(String letter) {
-        return bookDao.findByGenreFirstLetter(letter);
+        bookReactiveRepository.findByName(book.getName())
+                .map((x) -> ResponseEntity.status(HttpStatus.CONFLICT.value()).body(book)) //если книга найдена - ошибка
+                .switchIfEmpty(authorReactiveRepository.saveAll(book.getAuthors())
+                        .last() //только последнего автора. Для трансформации Flux->Mono
+                        .flatMap((q) -> bookReactiveRepository.save(book).map(b -> ResponseEntity.ok(b)))).subscribe();
     }
 }

@@ -1,90 +1,69 @@
 package ru.izergin.hometask.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ru.izergin.hometask.domain.Author;
 import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.dto.BookAuthorDeleteRequestDto;
-import ru.izergin.hometask.dto.BookDto;
 import ru.izergin.hometask.dto.BookIdRequestDto;
-import ru.izergin.hometask.service.BookServiceImpl;
+import ru.izergin.hometask.repository.AuthorReactiveRepository;
+import ru.izergin.hometask.repository.BookReactiveRepository;
 
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 public class BookController {
 
-    @Autowired
-    private BookServiceImpl bookService;
+    private final BookReactiveRepository bookReactiveRepository;
+    private final AuthorReactiveRepository authorReactiveRepository;
 
-    @GetMapping("/api/getAllBooks")
-    public List<Book> getAllBooks() {
-        List<Book> bookList = bookService.getAll();
-        return bookList;
+    @GetMapping("/api/findAll")
+    public Flux<Book> findAll() {
+        return bookReactiveRepository.findAll();
     }
 
-    @PostMapping("/api/getBook")
-    public Book getBook(@RequestBody BookIdRequestDto bookIdRequestDto) {
-        System.out.println(bookIdRequestDto.getId());
-        Book book =  bookService.findById(bookIdRequestDto.getId());
-        return book;
+    @PostMapping("/api/findById")
+    public Mono<Book> findById(@RequestBody BookIdRequestDto bookIdRequestDto) {
+        return bookReactiveRepository.findById(bookIdRequestDto.getId());
     }
 
-    @PostMapping(value = "/api/createBook", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<String> postCreateBook(@RequestBody Book book) {
-        try {
-            bookService.save(new BookDto(book.getName(), book.getGenre(), book.getPageCount()));
-            int result_code = HttpStatus.OK.value();
-            String result_message = "Книга создана";
-            return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                    "\"result_message\":\"" + result_message + "\"}");
-        } catch (DataIntegrityViolationException e) {
-            int result_code = HttpStatus.CONFLICT.value();
-            String result_message = "Книга с таким именем уже существует";
-            return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                    "\"result_message\":\"" + result_message + "\"}");
-        }
+    @PostMapping(value = "/api/create")
+    public Mono<ResponseEntity<Book>> create(@RequestBody Book book) {
+        // сперва проверяем, есть ли книга с таким названием, затем сохраняем авторов и затем - книгу
+        return bookReactiveRepository.findByName(book.getName())
+                .map((x) -> ResponseEntity.status(HttpStatus.CONFLICT.value()).body(book)) //если книга найдена - ошибка
+                .switchIfEmpty(authorReactiveRepository.saveAll(book.getAuthors())
+                        .last() //только последнего автора. Для трансформации Flux->Mono
+                        .flatMap((q) -> bookReactiveRepository.save(book).map(b -> ResponseEntity.ok(b))));
     }
 
-    @PostMapping(value = "/api/deleteBook")
-    @ResponseBody
-    public ResponseEntity<String> postDeleteBook(@RequestBody BookIdRequestDto bookIdRequestDto) {
-        bookService.deleteById(bookIdRequestDto.getId());
-        int result_code = HttpStatus.OK.value();
-        String result_message = "Книга успешно удалена";
-        return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                "\"result_message\":\"" + result_message + "\"}");
+    @PostMapping(value = "/api/deleteById")
+    public Mono<ResponseEntity<Void>> deleteById(@RequestBody Book b) {
+        return bookReactiveRepository.findById(b.getId())
+                .flatMap(book -> bookReactiveRepository.delete(book)
+                        .then(Mono.just(ResponseEntity.ok().<Void>build())))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "/api/updateBook", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<String> postUpdateBook(@RequestBody Book book) {
-        try {
-            bookService.update(book);
-            int result_code = HttpStatus.OK.value();
-            String result_message = "Книга обновлена";
-            return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                    "\"result_message\":\"" + result_message + "\"}");
-        } catch (DataIntegrityViolationException e) {
-            int result_code = HttpStatus.CONFLICT.value();
-            String result_message = "Книга с таким именем уже существует";
-            return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                    "\"result_message\":\"" + result_message + "\"}");
-        }
+    @PostMapping(value = "/api/book/update")
+    public Mono<ResponseEntity<Book>> updateBook(@RequestBody Book book) {
+        return bookReactiveRepository.save(book).map(b -> ResponseEntity.ok(b))
+                .onErrorReturn(ResponseEntity.badRequest().body(book));
     }
 
-    @PostMapping(value="/api/deleteAuthor", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<String> getDeleteAuthor(@RequestBody BookAuthorDeleteRequestDto bookAuthorDeleteRequestDto) {
-        System.out.println(bookAuthorDeleteRequestDto);
-        bookService.deleteAuthor(bookAuthorDeleteRequestDto.getBookId(), bookAuthorDeleteRequestDto.getAuthorNum());
-        int result_code = HttpStatus.OK.value();
-        String result_message = "Автор удален";
-        return ResponseEntity.status(HttpStatus.OK).body("{\"result_code\":\"" + result_code + "\"," +
-                "\"result_message\":\"" + result_message + "\"}");
+    @PostMapping(value = "/api/author/delete")
+    public Mono<ResponseEntity<Book>> AuthorDelete(@RequestBody BookAuthorDeleteRequestDto bookAuthorDeleteRequestDto) {
+        Mono<Book> bookMono = bookReactiveRepository.findById(bookAuthorDeleteRequestDto.getBookId());
+        return bookMono.flatMap(book -> {
+            List<Author> authors = book.getAuthors();
+            authors.remove(bookAuthorDeleteRequestDto.getAuthorNum());
+            return bookReactiveRepository.save(book.setAuthors(authors)).map(b -> ResponseEntity.ok(b));
+        });
     }
 }
 

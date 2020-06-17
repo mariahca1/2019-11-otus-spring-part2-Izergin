@@ -2,13 +2,19 @@ package ru.izergin.hometask;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.context.ConfigurableApplicationContext;
+import ru.izergin.hometask.service.BookServiceImpl;
 
 @SpringBootApplication
-@EnableMongoRepositories
 public class Application {
+    private static BookServiceImpl bookService;
+
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+
+        bookService = context.getBean(BookServiceImpl.class);
+
+        bookService.init();
     }
 
 }

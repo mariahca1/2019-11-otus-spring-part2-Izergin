@@ -1,9 +1,13 @@
-spring:
-  data:
-    mongodb:
+#spring:
+#  data:
+#    mongodb:
 #      host: localhost
 #      port: 27017
-      database: ex13
+#      database: ex20
+#spring:
+#  data:
+#    mongodb:
+#      uri=mongodb://user:secret@localhost:27017:
 logging:
   level:
     ROOT: ERROR

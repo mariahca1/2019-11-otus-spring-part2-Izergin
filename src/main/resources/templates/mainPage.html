@@ -3,43 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>List of all books</title>
-    <style type="text/css">
-        body {
-            padding: 50px;
-        }
-        .table, .table td {
-            border: 1px solid lightgray;
-            padding: 5px;
-        }
-        .container {
-          width: 100%;
-          max-width: 1024px; /*максимальная ширина может иметь другое значение*/
-          padding: 0 15px;
-          margin: 0 auto;
-        }
-        .col-1-4 {
-          width: 25%;
-          float: left;
-          background: lightblue;
-        }
-        .col-3-4 {
-          width: 75%;
-          float: left;
-          background: seashell;
-        }
-        .container:after, .row:after {
-          content: "";
-          display: table;
-          clear: both;
-        }
-        .row {
-          margin-bottom: 15px;
-        }
-        .container {
-          margin-bottom: 50px;
-        }
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}"/>
     <script src="webjars/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
@@ -92,63 +56,7 @@
     </div>
 </footer>
 
-<script>
-    $(document).ajaxError(function() {
-        $(".err").text("Triggered ajaxError handler.");
-    });
-    loadBooks();
 
-    function loadBooks(){
-        $("#tblAllBooks").empty();
-        $.ajax({
-            url: '/api/getAllBooks',
-            success: function(data) {
-                data.forEach(function(book, i) {
-                    var a = "";
-                    book.authors.forEach(function(author, j){
-                        a += "<div>" + author.firstName + " " + author.secondName + "</div>";
-                        })
-                    $("#tblAllBooks").append(`<tr>
-                                                  <td>`+(i+1)+`</td>
-                                                  <td>`+book.name+`</td>
-                                                  <td>`+book.genre+`</td>
-                                                  <td>`+book.pageCount+`</td>
-                                                  <td>`+a+`</td>
-                                                  <td>
-                                                        <div><a href="update?id=${book.id}">Редактировать</a></div>
-                                                      <div><button id="`+book.id+`" onClick="deleteBook(this.id)">Удалить</button></div>
-                                                  </td>
-                                             </tr>`);
-                });
-            }
-        });
-    }
-
-    function deleteBook(id){
-        console.log(id);
-
-        $.ajax({
-            url: '/api/deleteBook',
-            method: 'POST',
-            data: JSON.stringify({
-                id: id
-            }),
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            beforeSend: function() {
-                $("#tblAllBooks").empty();
-            },
-            complete: function(data) {
-
-                if (data.responseJSON.result_code == 200) {
-                    loadBooks();
-                } else {
-                    alert(data.responseJSON.result_message);
-                }
-            }
-        });
-    }
-</script>
-
+<script href="../static/js/main.css" th:src="@{/js/main.js}" type="text/javascript"></script>
 </body>
 </html>

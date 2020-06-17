@@ -13,5 +13,8 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class BookAuthorDeleteRequestDto {
     private String bookId;
+
     private int authorNum;
+    private String authorId;
+
 }
