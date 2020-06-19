@@ -54,6 +54,7 @@
                 <h3>Действия:</h3>
                 <nav>
                     <ul>
+                        <li><span>Logged as: </span><span th:text="${loggedUserName}"></span></li>
                         <li><a href="mainPage.html" th:href="@{/main}">Вернуться на главную</a></li>
                     </ul>
                 </nav>
@@ -61,7 +62,7 @@
             <div class="col-3-4">
                 <h3>Создание книги:</h3>
 
-                <form action="#" th:action="@{/create}" th:object="${book}" method="post">
+                <form action="#" th:action="@{/book/create}" th:object="${book}" method="post">
                     <ul>
                         <li><label>Название</label></li>
                         <li><input type="text" th:field="*{name}"/></li>

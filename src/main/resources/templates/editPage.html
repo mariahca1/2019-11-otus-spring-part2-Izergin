@@ -55,6 +55,7 @@
                 <h3>Действия:</h3>
                 <nav>
                     <ul>
+                        <li><span>Logged as: </span><span th:text="${loggedUserName}"></span></li>
                         <li><a href="mainPage.html" th:href="@{/main}">Главная форма</a></li>
                         <li><a href="createPage.html" th:href="@{/create}">Создать новую книгу</a></li>
                     </ul>
@@ -62,7 +63,7 @@
             </div>
             <div class="col-3-4">
                 <h3>Данные книги</h3>
-                <form id="updateForm" action="#" th:action="@{/update}" th:object="${updatedBook}" method="post">
+                <form id="updateForm" action="#" th:action="@{/book/update}" th:object="${updatedBook}" method="post">
                     <div class="row">
                         <input type="hidden" th:field="*{id}" value="123" readonly="readonly"/>
                     </div>

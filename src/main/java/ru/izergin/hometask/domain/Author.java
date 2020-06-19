@@ -21,10 +21,10 @@ public class Author {
     @Id
     private String id;
 
-    @Field(name = "first_name")
+    @Field("first_name")
     private String firstName;
 
-    @Field(name = "second_name")
+    @Field("second_name")
     private String secondName;
 
     @Override
