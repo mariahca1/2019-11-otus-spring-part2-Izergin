@@ -54,7 +54,7 @@ class BookControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    @WithMockUser(value = "adm", authorities = "ADMIN")
+    @WithMockUser(value = "adm", authorities = "ROLE_ADMIN")
     @Test
     void formCreateAcceessTrueTest() throws Exception {
         //данный тест не проходит, ошибка 403, forbidden, Что я не так делаю?

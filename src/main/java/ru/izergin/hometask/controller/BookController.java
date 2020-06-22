@@ -104,7 +104,7 @@ public class BookController {
         return "mainPage";
     }
 
-    public String getLoggedUserName() {
+    private String getLoggedUserName() {
         try {
             SecurityContext securityContext = SecurityContextHolder.getContext();
             Authentication authentication = securityContext.getAuthentication();
