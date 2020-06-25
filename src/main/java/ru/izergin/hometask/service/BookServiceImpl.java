@@ -1,5 +1,6 @@
 package ru.izergin.hometask.service;
 
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,11 +13,10 @@ import ru.izergin.hometask.dto.BookDto;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class BookServiceImpl implements BookService {
 
-    @Autowired
     private BookDao bookDao;
-    @Autowired
     private AuthorServiceImpl authorService;
 
     @Transactional(readOnly = true)

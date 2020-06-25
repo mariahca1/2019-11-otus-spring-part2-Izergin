@@ -21,17 +21,17 @@ public class Book {
     @Id
     private String id;
 
-    @Field(name = "name")
+    @Field("name")
     @Indexed(unique = true)
     private String name;
 
-    @Field(name = "genre")
+    @Field("genre")
     private String genre;
 
-    @Field(name = "page_count")
+    @Field("page_count")
     private Integer pageCount;
 
-    @Field(name = "comments")
+    @Field("comments")
     private List<String> comments;
 
     @DBRef
