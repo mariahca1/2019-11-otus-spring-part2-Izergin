@@ -13,6 +13,7 @@ import ru.izergin.hometask.domain.Book;
 import ru.izergin.hometask.dto.BookDto;
 import ru.izergin.hometask.service.BookServiceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -95,9 +96,10 @@ public class BookController {
 
     @PostMapping("/book/create")
     public String postCreateBook(@ModelAttribute Book book, Model model) {
-        bookService.save(new BookDto(book.getName(), book.getGenre(), book.getPageCount())
-                .addAuthor(new Author(book.getAuthors().get(0).getFirstName(), book.getAuthors().get(0).getSecondName()))
-        );
+        List<BookDto> bookDtos = new ArrayList<>();
+        bookDtos.add(new BookDto(book.getName(), book.getGenre(), book.getPageCount())
+                        .addAuthor(new Author(book.getAuthors().get(0).getFirstName(), book.getAuthors().get(0).getSecondName())));
+        bookService.save(bookDtos);
         List<Book> bookList = bookService.getAll();
         model.addAttribute("bookList", bookList);
         model.addAttribute("loggedUserName", getLoggedUserName());
