@@ -2,7 +2,8 @@ package ru.izergin.hometask.service;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.izergin.hometask.dao.BookDao;
@@ -30,8 +31,16 @@ public class BookServiceImpl implements BookService {
 
     @SneakyThrows
     @Transactional
+    @PreFilter(value = "hasRole('ROLE_ADMIN') or !'Secret'.equals(filterObject.getGenreName())",
+            filterTarget = "bookDtos")
     //сохранение книги
-    public Book save(BookDto bookDto) {
+    public Book save(List<BookDto> bookDtos) {
+        BookDto bookDto;
+        try {
+            bookDto = bookDtos.get(0); // вот тут костыль
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalAccessException("Данное действие вам запрещено");
+        }
         List<Author> authorList = authorService.saveList(bookDto.getAuthors());
         Book book = new Book(bookDto.getName(), bookDto.getGenreName(), bookDto.getPageCount())
                 .setAuthors(authorList)
@@ -48,28 +57,28 @@ public class BookServiceImpl implements BookService {
     }
 
     @Transactional
-    public Book deleteComment(String bookId, int commentNum){
+    public Book deleteComment(String bookId, int commentNum) {
         Book book = bookDao.findById(bookId);
         book.getComments().remove(commentNum);
         return bookDao.save(book);
     }
 
     @Transactional
-    public Book addComment(String bookId, String commentText){
+    public Book addComment(String bookId, String commentText) {
         Book book = bookDao.findById(bookId);
         book.addComment(commentText);
         return update(book);
     }
 
     @Transactional
-    public Book deleteAuthor(String bookId, int authorNum){
+    public Book deleteAuthor(String bookId, int authorNum) {
         Book book = bookDao.findById(bookId);
         book.getAuthors().remove(authorNum);
         return update(book);
     }
 
     @Transactional
-    public Book addAuthor(String bookId, Author author){
+    public Book addAuthor(String bookId, Author author) {
         Book book = bookDao.findById(bookId).addAuthor(author);
         return update(book);
     }
@@ -89,6 +98,9 @@ public class BookServiceImpl implements BookService {
         bookDao.deleteById(id);
     }
 
+    @PostFilter("isAnonymous() and 'Common'.equals(filterObject.getGenre()) " +
+            "or hasRole('ROLE_ADMIN') " +
+            "or !hasRole('ROLE_ADMIN') and !isAnonymous() and !'Secret'.equals(filterObject.getGenre())")
     public List<Book> getAll() {
         return bookDao.findAll();
     }

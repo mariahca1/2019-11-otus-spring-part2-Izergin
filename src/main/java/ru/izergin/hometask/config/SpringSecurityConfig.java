@@ -2,6 +2,7 @@ package ru.izergin.hometask.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -9,12 +10,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/create").hasRole("ADMIN")
+                .antMatchers("/create").hasAnyRole("ADMIN","USER")
+                .antMatchers("/book/create").hasAnyRole("ADMIN","USER")
+
                 .antMatchers("/update").hasRole("ADMIN")
                 .antMatchers("/book/*").hasRole("ADMIN")
                 .antMatchers("/deleteComment").hasRole("ADMIN")
